@@ -44,7 +44,7 @@ resource "helm_release" "gha-runner-scale-set-dind" {
   create_namespace = true
   repository       = "https://argoproj.github.io/argo-helm"
   chart            = "argo-cd"
-  version          = "5.36.3" # Проверьте актуальную версию
+  version          = "2.9" # Проверьте актуальную версию
 
   values = [
     templatefile("/files/argocd-values.tmpl", {})
