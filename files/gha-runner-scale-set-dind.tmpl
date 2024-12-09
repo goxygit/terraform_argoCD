@@ -1,0 +1,33 @@
+githubConfigSecret: ${github_config_secret}
+githubConfigUrl: "https://github.com/goxygit/kurwa.git"
+minRunners: 0
+runnerScaleSetName: "${runner_name}"
+containerMode:
+  type: "dind"
+
+  
+template:
+  spec:
+    initContainers:
+    - name: kube-init
+      image: ghcr.io/actions/actions-runner:latest
+      command: ["sudo", "chown", "-R", "1001:123", "/home/runner/_work"]
+      volumeMounts:
+        - name: work
+          mountPath: /home/runner/_work 
+    containers:
+      - name: runner
+        image: ghcr.io/actions/actions-runner:latest
+        command: ["/home/runner/run.sh"]
+        env:
+        - name: RUNNER_EKS
+          value: "true"
+    volumes:
+      - name: work
+        ephemeral:
+          volumeClaimTemplate:
+            spec:
+              accessModes: [ "ReadWriteOnce" ]
+              resources:
+                requests:
+                  storage: 1Gi

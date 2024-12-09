@@ -1,0 +1,41 @@
+server:
+  service:
+    type: ClusterIP
+    port: 8080
+  extraArgs:
+    - "--insecure"
+
+controller:
+  resources:
+    limits:
+      cpu: 200m
+      memory: 512Mi
+    requests:
+      cpu: 100m
+      memory: 256Mi
+
+repo-server:
+  resources:
+    limits:
+      cpu: 500m
+      memory: 1Gi
+    requests:
+      cpu: 250m
+      memory: 512Mi
+
+applicationSet:
+  enabled: true
+
+redis:
+  enabled: true
+  resources:
+    limits:
+      cpu: 100m
+      memory: 256Mi
+    requests:
+      cpu: 50m
+      memory: 128Mi
+
+repository.credentials:
+  - url: "https://github.com/goxygit/terraform_argoCD.git"
+    secretName: "github-secret" # Имя Kubernetes Secret
