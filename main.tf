@@ -2,17 +2,17 @@ resource "docker_container" "gnidas_control_plane" {
   name  = "gnidas_control_plane"
   image = "kindest/node:v1.30.0"
   
-  environment = {
-    ENV_VAR_1 = "value1"
-    ENV_VAR_2 = "value2"
-  }
+  env = [
+    "ENV_VAR_1=value1",
+    "ENV_VAR_2=value2"
+  ]
 
   ports {
     internal = 80
     external = 8080
   }
 
-  memory = "1GB"
+  memory = 1024
   cpu_shares = 1024
 }
 
@@ -20,17 +20,17 @@ resource "docker_container" "gnidas_worker" {
   name  = "gnidas_worker"
   image = "kindest/node:v1.30.0"
   
-  environment = {
-    ENV_VAR_1 = "value1"
-    ENV_VAR_2 = "value2"
-  }
+  env = [
+    "ENV_VAR_1=value1",
+    "ENV_VAR_2=value2"
+  ]
 
   ports {
     internal = 80
     external = 8081
   }
 
-  memory = "1GB"
+  memory = 1024
   cpu_shares = 1024
 }
 
@@ -38,17 +38,17 @@ resource "docker_container" "gnidas_worker2" {
   name  = "gnidas_worker2"
   image = "kindest/node:v1.30.0"
   
-  environment = {
-    ENV_VAR_1 = "value1"
-    ENV_VAR_2 = "value2"
-  }
+  env = [
+    "ENV_VAR_1=value1",
+    "ENV_VAR_2=value2"
+  ]
 
   ports {
     internal = 80
     external = 8082
   }
 
-  memory = "1GB"
+  memory = 1024
   cpu_shares = 1024
 }
 
