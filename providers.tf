@@ -8,3 +8,4 @@ provider "helm" {
     config_context = "kind-gnidas"
   }
 }
+provider "docker" {}
