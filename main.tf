@@ -1,40 +1,57 @@
 resource "docker_container" "gnidas_control_plane" {
-  name  = "gnidas-control-plane"
+  name  = "gnidas_control_plane"
   image = "kindest/node:v1.30.0"
-  ports {
-    internal = 6443
-    external = 6443
-  }
-  resources {
-    memory = "1500Mi"
-    cpu    = "1"
-  }
+  
   environment = {
-    K8S_VERSION = "v1.30.0"
+    ENV_VAR_1 = "value1"
+    ENV_VAR_2 = "value2"
   }
-  volumes {
-    host_path      = "/var/lib/docker/volumes/gnidas-control-plane"
-    container_path = "/etc/kubernetes"
+
+  ports {
+    internal = 80
+    external = 8080
   }
+
+  memory = "1GB"
+  cpu_shares = 1024
 }
 
 resource "docker_container" "gnidas_worker" {
-  name  = "gnidas-worker"
+  name  = "gnidas_worker"
   image = "kindest/node:v1.30.0"
-  resources {
-    memory = "1500Mi"
-    cpu    = "1"
+  
+  environment = {
+    ENV_VAR_1 = "value1"
+    ENV_VAR_2 = "value2"
   }
+
+  ports {
+    internal = 80
+    external = 8081
+  }
+
+  memory = "1GB"
+  cpu_shares = 1024
 }
 
 resource "docker_container" "gnidas_worker2" {
-  name  = "gnidas-worker2"
+  name  = "gnidas_worker2"
   image = "kindest/node:v1.30.0"
-  resources {
-    memory = "1500Mi"
-    cpu    = "1"
+  
+  environment = {
+    ENV_VAR_1 = "value1"
+    ENV_VAR_2 = "value2"
   }
+
+  ports {
+    internal = 80
+    external = 8082
+  }
+
+  memory = "1GB"
+  cpu_shares = 1024
 }
+
 
 resource "helm_release" "cert_manager" {
   name             = "cert-manager"
