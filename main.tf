@@ -1,56 +1,3 @@
-resource "docker_container" "gnidas_control_plane" {
-  name  = "gnidas_control_plane"
-  image = "kindest/node:v1.30.0"
-  
-  env = [
-    "ENV_VAR_1=value1",
-    "ENV_VAR_2=value2"
-  ]
-
-  ports {
-    internal = 80
-    external = 8080
-  }
-
-  memory = 1024
-  cpu_shares = 1024
-}
-
-resource "docker_container" "gnidas_worker" {
-  name  = "gnidas_worker"
-  image = "kindest/node:v1.30.0"
-  
-  env = [
-    "ENV_VAR_1=value1",
-    "ENV_VAR_2=value2"
-  ]
-
-  ports {
-    internal = 80
-    external = 8081
-  }
-
-  memory = 1024
-  cpu_shares = 1024
-}
-
-resource "docker_container" "gnidas_worker2" {
-  name  = "gnidas_worker2"
-  image = "kindest/node:v1.30.0"
-  
-  env = [
-    "ENV_VAR_1=value1",
-    "ENV_VAR_2=value2"
-  ]
-
-  ports {
-    internal = 80
-    external = 8082
-  }
-
-  memory = 1024
-  cpu_shares = 1024
-}
 
 
 resource "helm_release" "cert_manager" {
@@ -91,16 +38,59 @@ resource "helm_release" "gha-runner-scale-set-dind" {
     })
   ]
 }
-
-  resource "helm_release" "argocd" {
-  name             = "argocd"
-  namespace        = "argocd" # Используем отдельный namespace
-  create_namespace = true
-  repository       = "https://argoproj.github.io/argo-helm"
-  chart            = "argo-cd"
-  version          = "2.9" # Проверьте актуальную версию
-
-  values = [
-    templatefile("/files/argocd-values.tmpl", {})
+resource "helm_release" "prometheus_grafana" {
+  name       = "prometheus-grafana"
+  namespace  = "monitoring"
+  repository = "https://prometheus-community.github.io/helm-charts"
+  chart      = "./environments/prometheus-grafana"
+  values     = [
+    file("./environments/prometheus-grafana/values.yaml")
   ]
+  
+  create_namespace = true
+}
+resource "helm_release" "argocd" {
+  name       = "argocd"
+  namespace  = "argocd"
+  repository = "https://argoproj.github.io/argo-helm"
+  chart      = "argo-cd"
+  version    = "7.4.4"  # Укажите актуальную версию
+values =[templatefile("/files/argocd-values.tmpl", {})]
+  set {
+    name  = "installCRDs"
+    value = "true"
+  }
+
+  create_namespace = true
+}
+resource "kubernetes_manifest" "argocd_application" {
+  manifest = {
+    apiVersion = "argoproj.io/v1alpha1"
+    kind       = "Application"
+    metadata = {
+      name      = "argocd-parent-application"
+      namespace = "argocd"
+    }
+    spec = {
+      destination = {
+        server    = "https://kubernetes.default.svc"
+        namespace = "gnida-dev"
+      }
+      source = {
+        repoURL        = "https://github.com/goxigit/terraform_argoCD.git"
+        path           = "./environments"
+        targetRevision = "application"
+      }
+      project = "gnida"
+      syncPolicy = {
+        automated = {
+          prune   = true
+          selfHeal = true
+        }
+        syncOptions = [
+          "CreateNamespace=true"
+        ]
+      }
+    }
+  }
 }
