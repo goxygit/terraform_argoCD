@@ -42,7 +42,7 @@ resource "helm_release" "prometheus_grafana" {
   repository = "https://prometheus-community.github.io/helm-charts"
   chart      = "./environments/prometheus-grafana"
   values     = [
-    file("./environments/prometheus-grafana/values.yaml")
+    file("./environments/Argocd/environments/prometheus-grafana/values.yaml")
   ]
   
   create_namespace = true
@@ -72,12 +72,20 @@ resource "kubernetes_secret" "argocd_repo_secret" {
     password = base64encode("github-secret")   # Замініть на ваш персональний токен
   }
 }
+locals {
+  apps = [
+    "prometheus-grafana",
+    "parent-application"
+  ]
+}
 resource "kubernetes_manifest" "argocd_application" {
+      for_each = toset(local.apps)
+
   manifest = {
     apiVersion = "argoproj.io/v1alpha1"
     kind       = "Application"
     metadata = {
-      name      = "argocd-parent-application"
+      name      = "argocd-${each.key}"
       namespace = "argocd"
     }
     spec = {
@@ -87,7 +95,7 @@ resource "kubernetes_manifest" "argocd_application" {
       }
       source = {
         repoURL        = "https://github.com/goxygit/terraform_argoCD.git"
-        path           = "./environments"
+        path           = "./environments/Argocd"
         targetRevision = "main"
         
       }
@@ -95,9 +103,10 @@ resource "kubernetes_manifest" "argocd_application" {
       project = "default"
       syncPolicy = {
         automated = {
-          prune   = true
-          selfHeal = true
+          prune   = true   # Удаление ресурсов, которых нет в репозитории
+          selfHeal = true  # Автоматическое восстановление ресурсов
         }
+
         syncOptions = [
           "CreateNamespace=true"
         ]
