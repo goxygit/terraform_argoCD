@@ -1,5 +1,3 @@
-
-
 resource "helm_release" "cert_manager" {
   name             = "cert-manager"
   repository       = "https://charts.jetstack.io"
@@ -63,6 +61,17 @@ values =[templatefile("/files/argocd-values.tmpl", {})]
 
   create_namespace = true
 }
+resource "kubernetes_secret" "argocd_repo_secret" {
+  metadata {
+    name      = "argocd-repo-secret"
+    namespace = "argocd"
+  }
+
+  data = {
+    username = base64encode("goxygit")   # Замініть на ваш GitHub username або інший репозиторій
+    password = base64encode("github-secret")   # Замініть на ваш персональний токен
+  }
+}
 resource "kubernetes_manifest" "argocd_application" {
   manifest = {
     apiVersion = "argoproj.io/v1alpha1"
@@ -77,11 +86,13 @@ resource "kubernetes_manifest" "argocd_application" {
         namespace = "gnida-dev"
       }
       source = {
-        repoURL        = "https://github.com/goxigit/terraform_argoCD.git"
+        repoURL        = "https://github.com/goxygit/terraform_argoCD.git"
         path           = "./environments"
-        targetRevision = "application"
+        targetRevision = "main"
+        
       }
-      project = "gnida"
+      
+      project = "default"
       syncPolicy = {
         automated = {
           prune   = true
