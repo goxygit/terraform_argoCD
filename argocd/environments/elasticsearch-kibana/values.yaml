@@ -1,6 +1,9 @@
 elasticsearch:
   namespace: gnida-dev
   replicas: 3
+  tls:
+    selfSignedCertificate:
+      enabled: true
 
   nodeSets:
     - name: default
