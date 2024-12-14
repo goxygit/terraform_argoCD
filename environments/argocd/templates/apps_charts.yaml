@@ -14,7 +14,7 @@ spec:
     namespace: monitoring
     server: 'https://kubernetes.default.svc'
   source:
-    path: environments/argocd/environments/{{ $folder }}
+    path: ./environments/argocd/environments/{{ $folder }}
     repoURL: "https://github.com/goxygit/terraform_argoCD.git"
     targetRevision: "main"
   project: "default"
