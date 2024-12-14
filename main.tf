@@ -78,7 +78,7 @@ resource "kubernetes_manifest" "argocd_application" {
       }
       source = {
         repoURL        = "https://github.com/goxygit/terraform_argoCD.git"
-        path           = "./environments/argocd"
+        path           = "./argocd"
         targetRevision = "main"
         
       }
