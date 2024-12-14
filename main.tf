@@ -36,17 +36,7 @@ resource "helm_release" "gha-runner-scale-set-dind" {
     })
   ]
 }
-resource "helm_release" "prometheus_grafana" {
-  name       = "prometheus-grafana"
-  namespace  = "monitoring"
-  repository = "https://prometheus-community.github.io/helm-charts"
-  chart      = "./environments/prometheus-grafana"
-  values     = [
-    file("./environments/argocd/environments/prometheus-grafana/values.yaml")
-  ]
-  
-  create_namespace = true
-}
+
 resource "helm_release" "argocd" {
   name       = "argocd"
   namespace  = "argocd"
@@ -95,7 +85,7 @@ resource "kubernetes_manifest" "argocd_application" {
       }
       source = {
         repoURL        = "https://github.com/goxygit/terraform_argoCD.git"
-        path           = "./environments/Argocd"
+        path           = "./environments/argocd"
         targetRevision = "main"
         
       }
