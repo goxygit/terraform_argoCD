@@ -26,6 +26,14 @@ elasticsearch:
     requests:
       memory: 1Gi
       cpu: 500m
+  extraEnvs:
+    - name: ELASTIC_PASSWORD
+      value: "changeme"
+    - name: xpack.security.enabled
+      value: "true"
+    - name: xpack.security.transport.ssl.enabled
+      value: "true"
+
 kibana:
   namespace: gnida-dev
   replicas: 1
