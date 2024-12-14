@@ -1,0 +1,28 @@
+{{- $pathPattern := "environments/*/values.yaml" }}
+{{- $matchedFiles := $.Files.Glob $pathPattern }}
+{{- range $path, $bytes := $matchedFiles }}
+  {{- $folder := base (dir $path) }}
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: {{ $folder }}
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  destination:
+    namespace: {{ $folder }}
+    server: 'https://kubernetes.default.svc'
+  source:
+    path: environments/{{ $folder }}
+    repoURL: "https://github.com/goxygit/terraform_argoCD.git"
+    targetRevision: "main"
+  project: "default"
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
+{{- end }}

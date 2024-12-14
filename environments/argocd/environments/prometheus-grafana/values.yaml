@@ -1,0 +1,26 @@
+# Values for Prometheus and Grafana
+prometheus:
+  namespace: gnida-dev
+  replicaCount: 1
+
+  resources:
+    limits:
+      cpu: 1536m
+      memory: 2Gi
+    requests:
+      cpu: 1536m
+      memory: 2Gi
+  persistence:
+    enabled: true
+    size: 10Gi
+
+grafana:
+  namespace: gnida-dev
+  adminPassword: "admin"
+  datasources:
+    default:
+      type: "prometheus"
+      url: "http://prometheus-server.monitoring.svc.cluster.local"
+  persistence:
+  enabled: true
+  size: 10Gi

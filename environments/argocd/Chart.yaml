@@ -1,0 +1,7 @@
+apiVersion: v2
+name: argocd
+description: ArgoCD parent application
+type: application
+
+version: v1.0.0
+appVersion: v1.0.0
