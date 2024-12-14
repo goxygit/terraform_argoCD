@@ -64,7 +64,6 @@ resource "kubernetes_secret" "argocd_repo_secret" {
 }
 locals {
   apps = [
-    "prometheus-grafana",
     "parent-application"
   ]
 }
