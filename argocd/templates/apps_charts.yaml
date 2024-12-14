@@ -1,4 +1,4 @@
-{{- $pathPattern := "../*/values.yaml" }}
+{{- $pathPattern := "environments/*/values.yaml" }}
 {{- $matchedFiles := $.Files.Glob $pathPattern }}
 {{- range $path, $bytes := $matchedFiles }}
   {{- $folder := base (dir $path) }}
@@ -14,7 +14,7 @@ spec:
     namespace: monitoring
     server: 'https://kubernetes.default.svc'
   source:
-    path: ./argocd/environments/{{ $folder }}
+    path: environments/{{ $folder }}
     repoURL: "https://github.com/goxygit/terraform_argoCD.git"
     targetRevision: "main"
   project: "default"
