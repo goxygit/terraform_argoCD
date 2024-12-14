@@ -42,7 +42,7 @@ resource "helm_release" "prometheus_grafana" {
   repository = "https://prometheus-community.github.io/helm-charts"
   chart      = "./environments/prometheus-grafana"
   values     = [
-    file("./environments/Argocd/environments/prometheus-grafana/values.yaml")
+    file("./environments/argocd/environments/prometheus-grafana/values.yaml")
   ]
   
   create_namespace = true
