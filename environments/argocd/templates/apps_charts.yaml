@@ -1,4 +1,4 @@
-{{- $pathPattern := "/environments/*/values.yaml" }}
+{{- $pathPattern := "../environments/*/values.yaml" }}
 {{- $matchedFiles := $.Files.Glob $pathPattern }}
 {{- range $path, $bytes := $matchedFiles }}
   {{- $folder := base (dir $path) }}
@@ -11,7 +11,7 @@ metadata:
     - resources-finalizer.argocd.argoproj.io
 spec:
   destination:
-    namespace: {{ $folder }}
+    namespace: monitoring
     server: 'https://kubernetes.default.svc'
   source:
     path: environments/{{ $folder }}

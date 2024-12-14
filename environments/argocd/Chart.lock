@@ -1,0 +1,6 @@
+dependencies:
+- name: policy-api
+  repository: file://./charts/policy-api
+  version: 1.0.0
+digest: sha256:002f603bd9e519ae2992bf28bcb4ce9efa647041fec80559817b85485928d1bd
+generated: "2024-10-17T16:39:09.8565576+03:00"
