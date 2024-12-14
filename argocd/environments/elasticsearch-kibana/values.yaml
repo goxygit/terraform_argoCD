@@ -1,31 +1,14 @@
-apiVersion: v2
-name: elasticsearch-kibana
-description: A Helm chart for Elasticsearch and Kibana
-version: 0.1.0
-appVersion: "1.0"
-dependencies:
-  - name: elasticsearch
-    version: "8.5.1"
-    repository: "https://helm.elastic.co"
-  - name: kibana
-    version: "8.5.1"
-    repository: "https://helm.elastic.co"
 elasticsearch:
   namespace: gnida-dev
   replicas: 3
-  tls:
-    # Полностью отключаем TLS и создание сертификатов
-    enabled: false # Отключаем TLS
-    selfSignedCertificate:
-      enabled: false # Отключаем генерацию самоподписанных сертификатов
+
   nodeSets:
     - name: default
       count: 3
       config:
         node.store.allow_mmap: false
-        xpack.security.enabled: true # Включаем безопасность
-        discovery.seed_providers: file # Подходит для кластера из нескольких нод
-        cluster.initial_master_nodes: ["default-0", "default-1", "default-2"] # Указываем все ноды для начальной инициализации
+        xpack.security.enabled: false # Отключаем безопасность (включая TLS)
+        discovery.type: single-node
       volumeClaimTemplates:
         - metadata:
             name: elasticsearch-data
@@ -35,6 +18,7 @@ elasticsearch:
               requests:
                 storage: 10Gi
             storageClassName: "standard"
+
   resources:
     limits:
       memory: 2Gi
@@ -42,18 +26,13 @@ elasticsearch:
     requests:
       memory: 1Gi
       cpu: 500m
-  extraEnvs:
-    - name: ELASTIC_PASSWORD
-      value: "changeme" # Пароль для пользователя elastic
-    - name: xpack.security.enabled
-      value: "true" # Включение безопасности
-    - name: xpack.security.transport.ssl.enabled
-      value: "false" # Отключаем SSL для транспортного соединения
 
 kibana:
   namespace: gnida-dev
   replicas: 1
-  elasticsearchHosts: http://elasticsearch-master.gnida-dev.svc.cluster.local:9200 # Используем HTTP вместо HTTPS
+
+  elasticsearchHosts: http://elasticsearch-master.gnida-dev.svc.cluster.local:9200 # HTTP вместо HTTPS
+
   resources:
     limits:
       memory: 1Gi
