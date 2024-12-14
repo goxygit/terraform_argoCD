@@ -1,8 +1,6 @@
-# Values for Prometheus and Grafana
 prometheus:
   namespace: gnida-dev
   replicaCount: 1
-
   resources:
     limits:
       cpu: 1536m
@@ -23,6 +21,6 @@ grafana:
       type: "prometheus"
       url: "http://prometheus-server.monitoring.svc.cluster.local"
   persistence:
-  enabled: true
-  storageClass: "standard"
-  size: 10Gi
+    enabled: true # Исправлено: добавлен правильный ключ
+    storageClass: "standard"
+    size: 10Gi
