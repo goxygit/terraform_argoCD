@@ -2,12 +2,16 @@ elasticsearch:
   namespace: gnida-dev
   replicas: 3
 
+  # Убираем настройку TLS и секрета для сертификатов
+  tls:
+    enabled: false # Отключаем TLS
+
   nodeSets:
     - name: default
       count: 3
       config:
         node.store.allow_mmap: false
-        xpack.security.enabled: false # Отключаем безопасность (включая TLS)
+        xpack.security.enabled: false # Отключаем безопасность
         discovery.type: single-node
       volumeClaimTemplates:
         - metadata:
