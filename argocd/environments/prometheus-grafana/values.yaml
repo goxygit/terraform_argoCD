@@ -12,6 +12,7 @@ prometheus:
       memory: 2Gi
   persistence:
     enabled: true
+    storageClass: "standard"
     size: 10Gi
 
 grafana:
@@ -23,4 +24,5 @@ grafana:
       url: "http://prometheus-server.monitoring.svc.cluster.local"
   persistence:
   enabled: true
+  storageClass: "standard"
   size: 10Gi
