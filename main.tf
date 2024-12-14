@@ -36,7 +36,6 @@ resource "helm_release" "gha-runner-scale-set-dind" {
     })
   ]
 }
-
 resource "helm_release" "argocd" {
   name       = "argocd"
   namespace  = "argocd"
@@ -62,19 +61,14 @@ resource "kubernetes_secret" "argocd_repo_secret" {
     password = base64encode("github-secret")   # Замініть на ваш персональний токен
   }
 }
-locals {
-  apps = [
-    "parent-application"
-  ]
-}
+
 resource "kubernetes_manifest" "argocd_application" {
-      for_each = toset(local.apps)
 
   manifest = {
     apiVersion = "argoproj.io/v1alpha1"
     kind       = "Application"
     metadata = {
-      name      = "argocd-${each.key}"
+      name      = "argocd-parent-application"
       namespace = "argocd"
     }
     spec = {
