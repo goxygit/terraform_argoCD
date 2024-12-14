@@ -4,6 +4,9 @@ elasticsearch:
   tls:
     selfSignedCertificate:
       enabled: true
+  master:
+    secrets:
+      certs: elasticsearch-master-certs
 
   nodeSets:
     - name: default
