@@ -1,4 +1,4 @@
-{{- $pathPattern := "environments/*/values.yaml" }}
+{{- $pathPattern := "environments/argocd/environments/*/values.yaml" }}
 {{- $matchedFiles := $.Files.Glob $pathPattern }}
 {{- range $path, $bytes := $matchedFiles }}
   {{- $folder := base (dir $path) }}
