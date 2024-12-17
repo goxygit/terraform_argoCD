@@ -47,3 +47,28 @@ elasticsearch:
 
   # Ресурсы
   resources:
+    limits:
+      memory: 2Gi
+      cpu: 1000m
+    requests:
+      memory: 1Gi
+      cpu: 500m
+
+kibana:
+  namespace: gnida-dev
+  replicas: 1
+
+  # Подключение к Elasticsearch по HTTP
+  elasticsearchHosts: http://elasticsearch-master.gnida-dev.svc.cluster.local:9200
+
+  # Отключаем проверку сертификатов в Kibana
+  xpack.security.enabled: false
+
+  # Ресурсы
+  resources:
+    limits:
+      memory: 1Gi
+      cpu: 500m
+    requests:
+      memory: 512Mi
+      cpu: 250m
