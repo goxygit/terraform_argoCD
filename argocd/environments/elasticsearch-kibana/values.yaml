@@ -4,21 +4,20 @@ elasticsearch:
 
   # Полностью отключаем TLS
   tls:
-    enabled: false
-    selfSignedCertificate: false # Отключаем самоподписанные сертификаты
+    enabled: false # Отключает TLS
+    selfSignedCertificate: false # Убираем самоподписанные сертификаты
 
-  # Конфигурация Elasticsearch
+  # Конфигурация узлов Elasticsearch
   nodeSets:
     - name: default
       count: 3
       config:
         node.store.allow_mmap: false
-        xpack.security.enabled: false # Полностью отключаем безопасность
+        xpack.security.enabled: false # Отключаем безопасность
         xpack.security.transport.ssl.enabled: false # Отключаем TLS для транспорта
         xpack.security.http.ssl.enabled: false # Отключаем TLS для HTTP
-        discovery.type: single-node # Режим одного узла
+        discovery.type: single-node # Для тестового окружения, один узел
 
-      # Настройки томов
       volumeClaimTemplates:
         - metadata:
             name: elasticsearch-data
@@ -30,22 +29,18 @@ elasticsearch:
                 storage: 10Gi
             storageClassName: "standard"
 
-  # Отключаем создание сертификатов и их монтирование
-  extraEnvs:
-    - name: xpack.security.enabled
-      value: "false"
-    - name: xpack.security.transport.ssl.enabled
-      value: "false"
-    - name: xpack.security.http.ssl.enabled
-      value: "false"
+  # Убираем любые секреты и их монтирования
+  secretMounts: [] # Отключаем монтирование секретов
+  extraVolumes: [] # Убираем дополнительные тома
+  extraVolumeMounts: [] # Убираем монтирование этих томов
+
+  # Настройка подов для удаления лишних монтирований
   podTemplate:
     spec:
       containers:
         - name: elasticsearch
-          volumeMounts: [] # Убираем монтирование томов для сертификатов
-      volumes: [] # Убираем тома для сертификатов
-
-  secretMounts: [] # Очищаем список секретов для монтирования
+          volumeMounts: [] # Убираем все монтирования для контейнера
+      volumes: [] # Убираем volumes для пода
 
   # Ресурсы
   resources:
@@ -60,10 +55,10 @@ kibana:
   namespace: gnida-dev
   replicas: 1
 
-  # Используем HTTP вместо HTTPS
+  # Подключение к Elasticsearch по HTTP
   elasticsearchHosts: http://elasticsearch-master.gnida-dev.svc.cluster.local:9200
 
-  # Отключаем проверку сертификатов
+  # Отключаем проверку сертификатов в Kibana
   xpack.security.enabled: false
 
   # Ресурсы
