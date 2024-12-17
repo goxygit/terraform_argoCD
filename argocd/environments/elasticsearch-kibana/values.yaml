@@ -3,14 +3,14 @@ elasticsearch:
   replicas: 3
 
   tls:
-    enabled: false # Отключаем TLS
+    enabled: false # Полностью отключаем TLS
 
   nodeSets:
     - name: default
       count: 3
       config:
         node.store.allow_mmap: false
-        xpack.security.enabled: false # Отключаем безопасность
+        xpack.security.enabled: false # Отключаем всю безопасность
         discovery.type: single-node
       volumeClaimTemplates:
         - metadata:
@@ -23,6 +23,7 @@ elasticsearch:
                 storage: 10Gi
             storageClassName: "standard"
 
+  # Убираем автоматическую генерацию секретов и сертификатов
   extraEnvs:
     - name: xpack.security.enabled
       value: "false" # Полное отключение безопасности
@@ -30,6 +31,17 @@ elasticsearch:
       value: "false" # Отключение SSL для транспорта
     - name: xpack.security.http.ssl.enabled
       value: "false" # Отключение SSL для HTTP
+
+  # Убираем монтирование volume для сертификатов
+  podTemplate:
+    spec:
+      containers:
+        - name: elasticsearch
+          volumeMounts: [] # Полностью удаляем любые volumeMounts
+
+  # Полностью отключаем volumes для сертификатов
+  volumeMounts: [] # Удаление volumeMounts на уровне podTemplate
+  volumes: [] # Удаление volumes на уровне podTemplate
 
   resources:
     limits:
