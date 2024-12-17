@@ -2,19 +2,16 @@ elasticsearch:
   namespace: gnida-dev
   replicas: 3
 
-  # Отключаем TLS и сертификаты
   tls:
     enabled: false # Отключаем TLS
-  selfSignedCertificate:
-    enabled: false
+
   nodeSets:
     - name: default
       count: 3
       config:
         node.store.allow_mmap: false
         xpack.security.enabled: false # Отключаем безопасность
-        discovery.type: single-node # Используем single-node для простоты
-        cluster.initial_master_nodes: ["default-0", "default-1", "default-2"] # Для инициализации кластера
+        discovery.type: single-node
       volumeClaimTemplates:
         - metadata:
             name: elasticsearch-data
@@ -24,6 +21,16 @@ elasticsearch:
               requests:
                 storage: 10Gi
             storageClassName: "standard"
+      volumeMounts: [] # Очищаем volumeMounts
+    volumes: []         # Очищаем volumes
+
+  extraEnvs:
+    - name: xpack.security.enabled
+      value: "false" # Полное отключение безопасности
+    - name: xpack.security.transport.ssl.enabled
+      value: "false" # Отключение SSL для транспорта
+    - name: xpack.security.http.ssl.enabled
+      value: "false" # Отключение SSL для HTTP
 
   resources:
     limits:
@@ -37,8 +44,7 @@ kibana:
   namespace: gnida-dev
   replicas: 1
 
-  # Используем HTTP вместо HTTPS
-  elasticsearchHosts: http://elasticsearch-master.gnida-dev.svc.cluster.local:9200
+  elasticsearchHosts: http://elasticsearch-master.gnida-dev.svc.cluster.local:9200 # HTTP вместо HTTPS
 
   resources:
     limits:
