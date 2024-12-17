@@ -22,8 +22,6 @@ elasticsearch:
               requests:
                 storage: 10Gi
             storageClassName: "standard"
-      volumeMounts: [] # Очищаем volumeMounts
-    volumes: []         # Очищаем volumes
 
   extraEnvs:
     - name: xpack.security.enabled
