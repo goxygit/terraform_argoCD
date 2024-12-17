@@ -20,8 +20,8 @@ elasticsearch:
         spec:
           containers:
             - name: elasticsearch
-              volumeMounts: [] # Удаляем монтирование
-          volumes: [] # Полностью убираем volumes
+              volumeMounts: []
+          volumes: []
 
       volumeClaimTemplates:
         - metadata:
@@ -38,21 +38,20 @@ kibana:
   namespace: gnida-dev
   replicas: 1
 
-  elasticsearchHosts: http://elasticsearch-master.gnida-dev.svc.cluster.local:9200
-
-  # Отключаем создание pre-install Job и зависимость от сертификатов
+  # Отключаем pre-install Job
   preInstallJob:
     enabled: false
 
-  extraVolumes: [] # Убираем дополнительные тома
-  extraVolumeMounts: [] # Убираем монтирования томов
+  elasticsearchHosts: http://elasticsearch-master.gnida-dev.svc.cluster.local:9200
 
-  # Отключаем все проверки сертификатов
+  # Отключаем TLS и сертификаты
   xpack.security.enabled: false
   xpack.security.http.ssl.enabled: false
   xpack.security.verify_certificate: false
 
-  # Ресурсы для Kibana
+  extraVolumes: []
+  extraVolumeMounts: []
+
   resources:
     limits:
       memory: 1Gi
