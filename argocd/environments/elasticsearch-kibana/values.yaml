@@ -2,24 +2,26 @@ elasticsearch:
   namespace: gnida-dev
   replicas: 3
 
-  # Полностью отключаем TLS
   tls:
-    enabled: false # Отключает TLS
-    selfSignedCertificate: false # Убираем самоподписанные сертификаты
+    enabled: false
+    selfSignedCertificate: false
 
-  # Отключаем создание секретов по умолчанию
-  skipDefaultSecret: true
-
-  # Конфигурация узлов Elasticsearch
   nodeSets:
     - name: default
       count: 3
       config:
         node.store.allow_mmap: false
-        xpack.security.enabled: false # Отключаем безопасность
-        xpack.security.transport.ssl.enabled: false # Отключаем TLS для транспорта
-        xpack.security.http.ssl.enabled: false # Отключаем TLS для HTTP
-        discovery.type: single-node # Для тестового окружения, один узел
+        xpack.security.enabled: false
+        xpack.security.transport.ssl.enabled: false
+        xpack.security.http.ssl.enabled: false
+        discovery.type: single-node
+
+      podTemplate:
+        spec:
+          containers:
+            - name: elasticsearch
+              volumeMounts: [] # Удаляем монтирование
+          volumes: [] # Полностью убираем volumes
 
       volumeClaimTemplates:
         - metadata:
@@ -32,39 +34,25 @@ elasticsearch:
                 storage: 10Gi
             storageClassName: "standard"
 
-  # Убираем любые секреты и их монтирования
-  secretMounts: [] # Отключаем монтирование секретов
-  extraVolumes: [] # Убираем дополнительные тома
-  extraVolumeMounts: [] # Убираем монтирование этих томов
-
-  # Настройка подов для удаления лишних монтирований
-  podTemplate:
-    spec:
-      containers:
-        - name: elasticsearch
-          volumeMounts: [] # Убираем все монтирования для контейнера
-      volumes: [] # Убираем volumes для пода
-
-  # Ресурсы
-  resources:
-    limits:
-      memory: 2Gi
-      cpu: 1000m
-    requests:
-      memory: 1Gi
-      cpu: 500m
-
 kibana:
   namespace: gnida-dev
   replicas: 1
 
-  # Подключение к Elasticsearch по HTTP
   elasticsearchHosts: http://elasticsearch-master.gnida-dev.svc.cluster.local:9200
 
-  # Отключаем проверку сертификатов в Kibana
-  xpack.security.enabled: false
+  # Отключаем создание pre-install Job и зависимость от сертификатов
+  preInstallJob:
+    enabled: false
 
-  # Ресурсы
+  extraVolumes: [] # Убираем дополнительные тома
+  extraVolumeMounts: [] # Убираем монтирования томов
+
+  # Отключаем все проверки сертификатов
+  xpack.security.enabled: false
+  xpack.security.http.ssl.enabled: false
+  xpack.security.verify_certificate: false
+
+  # Ресурсы для Kibana
   resources:
     limits:
       memory: 1Gi
