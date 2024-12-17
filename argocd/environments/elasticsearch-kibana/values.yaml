@@ -25,19 +25,19 @@ elasticsearch:
 
   # Убираем автоматическую генерацию секретов и сертификатов
   elasticsearch:
-  extraEnvs:
-    - name: xpack.security.enabled
-      value: "false"
-    - name: xpack.security.transport.ssl.enabled
-      value: "false"
-    - name: xpack.security.http.ssl.enabled
-      value: "false"
-  podTemplate:
-    spec:
-      containers:
-        - name: elasticsearch
-          volumeMounts: [] # Убираем все монтирования
-      volumes: [] # Убираем все volumes
+    extraEnvs:
+      - name: xpack.security.enabled
+        value: "false"
+      - name: xpack.security.transport.ssl.enabled
+        value: "false"
+      - name: xpack.security.http.ssl.enabled
+        value: "false"
+    podTemplate:
+      spec:
+        containers:
+          - name: elasticsearch
+            volumeMounts: [] # Убираем все монтирования
+        volumes: [] # Убираем все volumes
 
   resources:
     limits:
