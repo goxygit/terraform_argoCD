@@ -2,17 +2,23 @@ elasticsearch:
   namespace: gnida-dev
   replicas: 3
 
+  # Полностью отключаем TLS
   tls:
-    enabled: false # Полностью отключаем TLS
-    selfSignedCertificate: false # Отключаем создание самоподписанных сертификатов
+    enabled: false
+    selfSignedCertificate: false # Отключаем самоподписанные сертификаты
 
+  # Конфигурация Elasticsearch
   nodeSets:
     - name: default
       count: 3
       config:
         node.store.allow_mmap: false
-        xpack.security.enabled: false # Отключаем безопасность
-        discovery.type: single-node
+        xpack.security.enabled: false # Полностью отключаем безопасность
+        xpack.security.transport.ssl.enabled: false # Отключаем TLS для транспорта
+        xpack.security.http.ssl.enabled: false # Отключаем TLS для HTTP
+        discovery.type: single-node # Режим одного узла
+
+      # Настройки томов
       volumeClaimTemplates:
         - metadata:
             name: elasticsearch-data
@@ -24,24 +30,24 @@ elasticsearch:
                 storage: 10Gi
             storageClassName: "standard"
 
-  elasticsearch:
-    extraEnvs:
-      - name: xpack.security.enabled
-        value: "false"
-      - name: xpack.security.transport.ssl.enabled
-        value: "false"
-      - name: xpack.security.http.ssl.enabled
-        value: "false"
-    podTemplate:
-      spec:
-        containers:
-          - name: elasticsearch
-            volumeMounts: [] # Убираем все монтирования
-        volumes: [] # Убираем все volumes
+  # Отключаем создание сертификатов и их монтирование
+  extraEnvs:
+    - name: xpack.security.enabled
+      value: "false"
+    - name: xpack.security.transport.ssl.enabled
+      value: "false"
+    - name: xpack.security.http.ssl.enabled
+      value: "false"
+  podTemplate:
+    spec:
+      containers:
+        - name: elasticsearch
+          volumeMounts: [] # Убираем монтирование томов для сертификатов
+      volumes: [] # Убираем тома для сертификатов
 
-  # Удаляем секреты сертификатов
-  secretMounts: []
+  secretMounts: [] # Очищаем список секретов для монтирования
 
+  # Ресурсы
   resources:
     limits:
       memory: 2Gi
@@ -54,8 +60,13 @@ kibana:
   namespace: gnida-dev
   replicas: 1
 
-  elasticsearchHosts: http://elasticsearch-master.gnida-dev.svc.cluster.local:9200 # HTTP вместо HTTPS
+  # Используем HTTP вместо HTTPS
+  elasticsearchHosts: http://elasticsearch-master.gnida-dev.svc.cluster.local:9200
 
+  # Отключаем проверку сертификатов
+  xpack.security.enabled: false
+
+  # Ресурсы
   resources:
     limits:
       memory: 1Gi
