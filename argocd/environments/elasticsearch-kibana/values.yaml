@@ -24,24 +24,20 @@ elasticsearch:
             storageClassName: "standard"
 
   # Убираем автоматическую генерацию секретов и сертификатов
+  elasticsearch:
   extraEnvs:
     - name: xpack.security.enabled
-      value: "false" # Полное отключение безопасности
+      value: "false"
     - name: xpack.security.transport.ssl.enabled
-      value: "false" # Отключение SSL для транспорта
+      value: "false"
     - name: xpack.security.http.ssl.enabled
-      value: "false" # Отключение SSL для HTTP
-
-  # Убираем монтирование volume для сертификатов
+      value: "false"
   podTemplate:
     spec:
       containers:
         - name: elasticsearch
-          volumeMounts: [] # Полностью удаляем любые volumeMounts
-
-  # Полностью отключаем volumes для сертификатов
-  volumeMounts: [] # Удаление volumeMounts на уровне podTemplate
-  volumes: [] # Удаление volumes на уровне podTemplate
+          volumeMounts: [] # Убираем все монтирования
+      volumes: [] # Убираем все volumes
 
   resources:
     limits:
