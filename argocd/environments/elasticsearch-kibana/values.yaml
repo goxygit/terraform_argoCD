@@ -4,13 +4,14 @@ elasticsearch:
 
   tls:
     enabled: false # Полностью отключаем TLS
+    selfSignedCertificate: false # Отключаем создание самоподписанных сертификатов
 
   nodeSets:
     - name: default
       count: 3
       config:
         node.store.allow_mmap: false
-        xpack.security.enabled: false # Отключаем всю безопасность
+        xpack.security.enabled: false # Отключаем безопасность
         discovery.type: single-node
       volumeClaimTemplates:
         - metadata:
@@ -23,7 +24,6 @@ elasticsearch:
                 storage: 10Gi
             storageClassName: "standard"
 
-  # Убираем автоматическую генерацию секретов и сертификатов
   elasticsearch:
     extraEnvs:
       - name: xpack.security.enabled
@@ -38,6 +38,9 @@ elasticsearch:
           - name: elasticsearch
             volumeMounts: [] # Убираем все монтирования
         volumes: [] # Убираем все volumes
+
+  # Удаляем секреты сертификатов
+  secretMounts: []
 
   resources:
     limits:
