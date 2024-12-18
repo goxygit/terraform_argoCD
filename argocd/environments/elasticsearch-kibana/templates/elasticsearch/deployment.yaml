@@ -2,13 +2,13 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: elasticsearch-master
-  namespace: { { .Values.elasticsearch.namespace } }
+  namespace: {{ .Values.elasticsearch.namespace }}
   labels:
     app: elasticsearch
   annotations:
     argocd.argoproj.io/sync-wave: "0" # Устанавливается первым
 spec:
-  replicas: { { .Values.elasticsearch.replicaCount } }
+  replicas: {{ .Values.elasticsearch.replicaCount }}
   selector:
     matchLabels:
       app: elasticsearch
