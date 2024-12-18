@@ -1,0 +1,60 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: cert-gen
+  namespace: {{ .Values.elasticsearch.namespace }}
+  labels:
+    app: elasticsearch
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"  # Убедитесь, что это выполняется первым
+spec:
+  template:
+    spec:
+      containers:
+        - name: cert-gen
+          image: alpine:latest
+          command:
+            - /bin/sh
+            - -c
+            - |
+              # Устанавливаем OpenSSL
+              apk add --no-cache openssl;
+              
+              # Создаём директорию для сертификатов
+              mkdir -p /certs;
+
+              # Генерация корневого сертификата (CA)
+              echo "Generating CA key and certificate..."
+              openssl genrsa -out /certs/ca.key 4096;
+              openssl req -x509 -new -nodes -key /certs/ca.key -sha256 -days 3650 -out /certs/ca.crt -subj "/C=US/ST=CA/L=San Francisco/O=Elastic/OU=IT/CN=ElasticSearch-CA";
+
+              # Генерация ключа и сертификата для Elasticsearch
+              echo "Generating Elasticsearch key and certificate..."
+              openssl genrsa -out /certs/elasticsearch.key 4096;
+              openssl req -new -key /certs/elasticsearch.key -out /certs/elasticsearch.csr -subj "/C=US/ST=CA/L=San Francisco/O=Elastic/OU=IT/CN=elasticsearch";
+              openssl x509 -req -in /certs/elasticsearch.csr -CA /certs/ca.crt -CAkey /certs/ca.key -CAcreateserial -out /certs/elasticsearch.crt -days 3650 -sha256;
+
+              # Генерация ключа и сертификата для Kibana
+              echo "Generating Kibana key and certificate..."
+              openssl genrsa -out /certs/kibana.key 4096;
+              openssl req -new -key /certs/kibana.key -out /certs/kibana.csr -subj "/C=US/ST=CA/L=San Francisco/O=Elastic/OU=IT/CN=kibana";
+              openssl x509 -req -in /certs/kibana.csr -CA /certs/ca.crt -CAkey /certs/ca.key -CAcreateserial -out /certs/kibana.crt -days 3650 -sha256;
+
+              # Создание Kubernetes Secret для сертификатов
+              echo "Creating Kubernetes secret with generated certificates..."
+              kubectl create secret generic elasticsearch-master-certs \
+                --namespace {{ .Values.elasticsearch.namespace }} \
+                --from-file=ca.crt=/certs/ca.crt \
+                --from-file=elasticsearch.crt=/certs/elasticsearch.crt \
+                --from-file=elasticsearch.key=/certs/elasticsearch.key \
+                --from-file=kibana.crt=/certs/kibana.crt \
+                --from-file=kibana.key=/certs/kibana.key \
+                --dry-run=client -o yaml | kubectl apply -f -;
+          volumeMounts:
+            - name: certs
+              mountPath: /certs
+      restartPolicy: OnFailure
+      volumes:
+        - name: certs
+          emptyDir: {}
+  backoffLimit: 4

@@ -6,7 +6,7 @@ metadata:
   labels:
     app: elasticsearch
   annotations:
-    argocd.argoproj.io/sync-wave: "0" # Устанавливается первым
+    argocd.argoproj.io/sync-wave: "1"  # Устанавливается после Job (с сертификатами)
 spec:
   replicas: {{ .Values.elasticsearch.replicaCount }}
   selector:
@@ -26,7 +26,16 @@ spec:
           env:
             - name: discovery.type
               value: "single-node"
+            - name: ELASTICSEARCH_SSL_CERTIFICATEAUTHORITIES
+              value: /usr/share/elasticsearch/config/certs/ca.crt
+            - name: ELASTICSEARCH_SSL_KEY
+              value: /usr/share/elasticsearch/config/certs/elasticsearch.key
+            - name: ELASTICSEARCH_SSL_CERT
+              value: /usr/share/elasticsearch/config/certs/elasticsearch.crt
           volumeMounts:
+            - name: elasticsearch-certs
+              mountPath: /usr/share/elasticsearch/config/certs
+              readOnly: true
             - name: data
               mountPath: /usr/share/elasticsearch/data
   volumeClaimTemplates:
@@ -37,3 +46,7 @@ spec:
         resources:
           requests:
             storage: 10Gi
+  volumes:
+    - name: elasticsearch-certs
+      secret:
+        secretName: elasticsearch-master-certs
