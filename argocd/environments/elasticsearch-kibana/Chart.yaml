@@ -1,0 +1,5 @@
+apiVersion: v2
+name: elasticsearch-kibana
+description: Combined Elasticsearch and Kibana stack
+version: 1.0.0
+appVersion: 8.5.1

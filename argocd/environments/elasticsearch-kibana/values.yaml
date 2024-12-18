@@ -1,0 +1,29 @@
+elasticsearch:
+  replicaCount: 3
+  namespace: monitoring
+  tls:
+    enabled: false
+  xpack:
+    security:
+      enabled: false
+      transport_ssl_enabled: false
+      http_ssl_enabled: false
+  resources:
+    limits:
+      memory: 2Gi
+      cpu: 1
+    requests:
+      memory: 1Gi
+      cpu: 500m
+
+kibana:
+  replicaCount: 1
+  namespace: monitoring
+  elasticsearchHost: "http://elasticsearch-master.monitoring.svc.cluster.local:9200"
+  resources:
+    limits:
+      memory: 1Gi
+      cpu: 500m
+    requests:
+      memory: 512Mi
+      cpu: 250m
