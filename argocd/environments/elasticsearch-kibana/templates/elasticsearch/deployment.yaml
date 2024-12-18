@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: elasticsearch
-          image: docker.elastic.co/elasticsearch/elasticsearch:{{ .Chart.appVersion }}
+          image: docker.elastic.co/elasticsearch/elasticsearch:{{ .Values.elasticsearch.imageTag }}
           ports:
             - containerPort: 9200
             - containerPort: 9300

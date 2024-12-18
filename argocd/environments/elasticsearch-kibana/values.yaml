@@ -1,6 +1,7 @@
 elasticsearch:
   replicaCount: 3
   namespace: monitoring
+  imageTag: "8.5.1"
   tls:
     enabled: false
   xpack:
@@ -19,6 +20,7 @@ elasticsearch:
 kibana:
   replicaCount: 1
   namespace: monitoring
+  imageTag: "8.5.1"
   elasticsearchHost: "http://elasticsearch-master.monitoring.svc.cluster.local:9200"
   resources:
     limits:
