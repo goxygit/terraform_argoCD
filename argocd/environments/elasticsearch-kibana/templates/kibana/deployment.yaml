@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: kibana
-          image: docker.elastic.co/kibana/kibana:{{ .Chart.appVersion }}
+          image: docker.elastic.co/kibana/kibana:{{ .Values.kibana.imageTag }}
           ports:
             - containerPort: 5601
           env:
