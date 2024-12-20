@@ -2,11 +2,11 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: cert-gen
-  namespace: {{ .Values.elasticsearch.namespace }}
+  namespace: monitoring
   labels:
     app: elasticsearch
   annotations:
-    argocd.argoproj.io/sync-wave: "0" # Выполняется перед Elasticsearch
+    argocd.argoproj.io/sync-wave: "0" # Запуск до всех остальных компонентов
 spec:
   template:
     spec:
@@ -19,16 +19,16 @@ spec:
             - |
               apk add --no-cache openssl;
               mkdir -p /certs;
-              # Генерация корневого сертификата (CA)
+              # Generate CA key and cert
               openssl genrsa -out /certs/ca.key 4096;
               openssl req -x509 -new -nodes -key /certs/ca.key -sha256 -days 3650 -out /certs/ca.crt -subj "/C=US/ST=CA/L=San Francisco/O=Elastic/OU=IT/CN=ElasticSearch-CA";
-              # Генерация сертификата для Elasticsearch
+              # Generate Elasticsearch key and cert
               openssl genrsa -out /certs/elasticsearch.key 4096;
               openssl req -new -key /certs/elasticsearch.key -out /certs/elasticsearch.csr -subj "/C=US/ST=CA/L=San Francisco/O=Elastic/OU=IT/CN=elasticsearch";
               openssl x509 -req -in /certs/elasticsearch.csr -CA /certs/ca.crt -CAkey /certs/ca.key -CAcreateserial -out /certs/elasticsearch.crt -days 3650 -sha256;
-              # Создание Kubernetes Secret
+              # Create Kubernetes secret
               kubectl create secret generic elasticsearch-master-certs \
-                --namespace {{ .Values.elasticsearch.namespace }} \
+                --namespace monitoring \
                 --from-file=ca.crt=/certs/ca.crt \
                 --from-file=tls.crt=/certs/elasticsearch.crt \
                 --from-file=tls.key=/certs/elasticsearch.key \
@@ -39,5 +39,5 @@ spec:
       restartPolicy: OnFailure
       volumes:
         - name: certs
-          emptyDir: {}
+          emptyDir: {} # Временное хранилище для генерации файлов
   backoffLimit: 4
