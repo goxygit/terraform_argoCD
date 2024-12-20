@@ -6,7 +6,7 @@ metadata:
   labels:
     app: kibana
   annotations:
-    argocd.argoproj.io/sync-wave: "2" # Устанавливается после Elasticsearch
+    argocd.argoproj.io/sync-wave: "2"  # Устанавливается после Elasticsearch
 spec:
   replicas: {{ .Values.kibana.replicaCount }}
   selector:
@@ -37,6 +37,10 @@ spec:
                   key: password
             - name: ELASTICSEARCH_SSL_CERTIFICATEAUTHORITIES
               value: /usr/share/kibana/config/certs/ca.crt
+            - name: ELASTICSEARCH_SSL_KEY
+              value: /usr/share/kibana/config/certs/kibana.key
+            - name: ELASTICSEARCH_SSL_CERT
+              value: /usr/share/kibana/config/certs/kibana.crt
           volumeMounts:
             - name: elasticsearch-certs
               mountPath: /usr/share/kibana/config/certs
