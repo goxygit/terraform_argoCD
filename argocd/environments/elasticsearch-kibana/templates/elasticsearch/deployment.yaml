@@ -6,7 +6,7 @@ metadata:
   labels:
     app: elasticsearch
   annotations:
-    argocd.argoproj.io/sync-wave: "1"  # Убедитесь, что Elasticsearch развертывается после сертификатов
+    argocd.argoproj.io/sync-wave: "1" # Выполняется после генерации сертификатов
 spec:
   replicas: {{ .Values.elasticsearch.replicaCount }}
   selector:
@@ -26,11 +26,26 @@ spec:
           env:
             - name: discovery.type
               value: "single-node"
+            - name: xpack.security.enabled
+              value: "true"
+            - name: xpack.security.http.ssl.enabled
+              value: "true"
+            - name: xpack.security.http.ssl.key
+              value: "/usr/share/elasticsearch/config/certs/tls.key"
+            - name: xpack.security.http.ssl.certificate
+              value: "/usr/share/elasticsearch/config/certs/tls.crt"
+            - name: xpack.security.http.ssl.certificate_authorities
+              value: "/usr/share/elasticsearch/config/certs/ca.crt"
           volumeMounts:
             - name: data
               mountPath: /usr/share/elasticsearch/data
-            - name: elasticsearch-certs  # Монтируем сертификаты для Elasticsearch
+            - name: elasticsearch-certs
               mountPath: /usr/share/elasticsearch/config/certs
+              readOnly: true
+      volumes:
+        - name: elasticsearch-certs
+          secret:
+            secretName: elasticsearch-master-certs
   volumeClaimTemplates:
     - metadata:
         name: data
@@ -39,7 +54,3 @@ spec:
         resources:
           requests:
             storage: 10Gi
-  volumes:
-    - name: elasticsearch-certs
-      secret:
-        secretName: elasticsearch-master-certs
