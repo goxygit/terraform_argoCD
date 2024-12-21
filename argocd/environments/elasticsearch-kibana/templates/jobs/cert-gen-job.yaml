@@ -1,3 +1,13 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: elasticsearch-master-credentials
+  namespace: monitoring
+type: Opaque
+data:
+  username: {{ .Values.elasticsearch.username | b64enc }}
+  password: {{ .Values.elasticsearch.password | b64enc }}
+---
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -29,7 +39,7 @@ spec:
           openssl req -new -key /certs/elasticsearch.key -out /certs/elasticsearch.csr -subj "/C=US/ST=CA/L=San Francisco/O=Elastic/OU=IT/CN=elasticsearch"
           openssl x509 -req -in /certs/elasticsearch.csr -CA /certs/ca.crt -CAkey /certs/ca.key -CAcreateserial -out /certs/elasticsearch.crt -days 3650 -sha256
 
-          # Создание секрета в Kubernetes
+          # Создание секрета с сертификатами в Kubernetes
           kubectl create secret generic elasticsearch-master-certs \
             --namespace monitoring \
             --from-file=ca.crt=/certs/ca.crt \
@@ -56,7 +66,7 @@ metadata:
   name: cert-gen-role
   namespace: monitoring
 rules:
-- apiGroups: [""]
+- apiGroups: [""]  # "" indicates the core API group
   resources: ["secrets"]
   verbs: ["create", "get", "update"]
 ---
