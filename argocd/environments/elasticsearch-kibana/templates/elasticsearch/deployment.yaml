@@ -6,7 +6,7 @@ metadata:
   labels:
     app: elasticsearch
   annotations:
-    argocd.argoproj.io/sync-wave: "2" # Выполняется после генерации сертификатов
+    argocd.argoproj.io/sync-wave: "1" # Выполняется после генерации сертификатов
 spec:
   replicas: {{ .Values.elasticsearch.replicaCount }}
   selector:
