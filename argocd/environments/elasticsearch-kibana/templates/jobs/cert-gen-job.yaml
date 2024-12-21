@@ -3,6 +3,8 @@ kind: Job
 metadata:
   name: cert-gen
   namespace: monitoring
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
 spec:
   template:
     spec:
