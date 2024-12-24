@@ -1,56 +1,46 @@
-apiVersion: apps/v1
-kind: StatefulSet
+apiVersion: elasticsearch.k8s.elastic.co/v1
+kind: Elasticsearch
 metadata:
-  name: elasticsearch-master
-  namespace: {{ .Values.elasticsearch.namespace }}
-  labels:
-    app: elasticsearch
+  name: elasticsearch
+  namespace: logging
   annotations:
-    argocd.argoproj.io/sync-wave: "1" # Выполняется после генерации сертификатов
+    argocd.argoproj.io/sync-wave: "5"
 spec:
-  replicas: {{ .Values.elasticsearch.replicaCount }}
-  selector:
-    matchLabels:
-      app: elasticsearch
-  template:
-    metadata:
-      labels:
-        app: elasticsearch
-    spec:
-      containers:
-        - name: elasticsearch
-          image: docker.elastic.co/elasticsearch/elasticsearch:{{ .Values.elasticsearch.imageTag }}
-          ports:
-            - containerPort: 9200
-            - containerPort: 9300
-          env:
-            - name: discovery.type
-              value: "single-node"
-            - name: xpack.security.enabled
-              value: "true"
-            - name: xpack.security.http.ssl.enabled
-              value: "true"
-            - name: xpack.security.http.ssl.key
-              value: "/usr/share/elasticsearch/config/certs/tls.key"
-            - name: xpack.security.http.ssl.certificate
-              value: "/usr/share/elasticsearch/config/certs/tls.crt"
-            - name: xpack.security.http.ssl.certificate_authorities
-              value: "/usr/share/elasticsearch/config/certs/ca.crt"
-          volumeMounts:
-            - name: data
-              mountPath: /usr/share/elasticsearch/data
-            - name: elasticsearch-certs
-              mountPath: /usr/share/elasticsearch/config/certs
-              readOnly: true
-      volumes:
-        - name: elasticsearch-certs
-          secret:
-            secretName: elasticsearch-master-certs
-  volumeClaimTemplates:
+  version: 8.5.1
+  http:
+    tls:
+      selfSignedCertificate:
+        disabled: true
+  replicaCount: {{ .Values.elasticsearch.replicaCount }}  # 3 реплики
+  xpack:
+    security:
+      enabled: false
+  auth: {}
+  nodeSets:
+  - name: default
+    count: {{ .Values.elasticsearch.replicaCount }}
+    volumeClaimTemplates:
     - metadata:
-        name: data
+        name: elasticsearch-data
       spec:
-        accessModes: ["ReadWriteOnce"]
+        accessModes:
+        - ReadWriteOnce
         resources:
           requests:
-            storage: 10Gi
+            storage: 10Gi  # Если нужно, адаптировать по вашему требованию
+    config:
+      xpack.monitoring.collection.enabled: true
+    podTemplate:
+      spec:
+        containers:
+          - name: elasticsearch
+            resources:
+              requests:
+                cpu: {{ .Values.elasticsearch.resources.requests.cpu }}
+                memory: {{ .Values.elasticsearch.resources.requests.memory }}
+              limits:
+                cpu: {{ .Values.elasticsearch.resources.limits.cpu }}
+                memory: {{ .Values.elasticsearch.resources.limits.memory }}
+            env:
+              - name: ES_JAVA_OPTS
+                value: "-Xms2g -Xmx2g"  # Пример использования памяти

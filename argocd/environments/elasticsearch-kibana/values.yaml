@@ -1,6 +1,6 @@
 elasticsearch:
   replicaCount: 3
-  namespace: monitoring
+  namespace: logging
   imageTag: "8.5.1"
   tls:
     enabled: false
@@ -19,9 +19,9 @@ elasticsearch:
 
 kibana:
   replicaCount: 1
-  namespace: monitoring
+  namespace: logging
   imageTag: "8.5.1"
-  elasticsearchHost: "http://elasticsearch-master.monitoring.svc.cluster.local:9200"
+  elasticsearchHost: "http://elasticsearch-master.logging.svc.cluster.local:9200"
   resources:
     limits:
       memory: 1Gi
@@ -29,3 +29,17 @@ kibana:
     requests:
       memory: 512Mi
       cpu: 250m
+
+filebeat:
+  replicaCount: 1
+  namespace: logging
+  imageTag: "8.5.1"
+  resources:
+    limits:
+      memory: 1Gi
+      cpu: 500m
+    requests:
+      memory: 512Mi
+      cpu: 250m
+  elasticsearchHost: "http://elasticsearch-master.logging.svc.cluster.local:9200"
+  kibanaHost: "http://kibana.logging.svc.cluster.local:5601"

@@ -1,47 +1,28 @@
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: kibana.k8s.elastic.co/v1
+kind: Kibana
 metadata:
   name: kibana
-  namespace: {{ .Values.kibana.namespace }}
-  labels:
-    app: kibana
+  namespace: logging
   annotations:
-    argocd.argoproj.io/sync-wave: "3"
+    argocd.argoproj.io/sync-wave: "10"
 spec:
-  replicas: {{ .Values.kibana.replicaCount }}
-  selector:
-    matchLabels:
-      app: kibana
-  template:
-    metadata:
-      labels:
-        app: kibana
+  version: 8.5.1
+  count: {{ .Values.kibana.replicaCount }}  # 1 реплика
+  elasticsearchRef:
+    name: elasticsearch
+  podTemplate:
     spec:
       containers:
-        - name: kibana
-          image: docker.elastic.co/kibana/kibana:{{ .Values.kibana.imageTag }}
-          ports:
-            - containerPort: 5601
-          env:
-            - name: ELASTICSEARCH_HOSTS
-              value: https://elasticsearch-master.{{ .Values.elasticsearch.namespace }}.svc.cluster.local:9200
-            - name: ELASTICSEARCH_USERNAME
-              valueFrom:
-                secretKeyRef:
-                  name: elasticsearch-master-credentials
-                  key: username
-            - name: ELASTICSEARCH_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: elasticsearch-master-credentials
-                  key: password
-            - name: ELASTICSEARCH_SSL_CERTIFICATEAUTHORITIES
-              value: /usr/share/kibana/config/certs/ca.crt
-          volumeMounts:
-            - name: elasticsearch-certs
-              mountPath: /usr/share/kibana/config/certs
-              readOnly: true
-      volumes:
-        - name: elasticsearch-certs
-          secret:
-            secretName: elasticsearch-master-certs
+      - name: kibana
+        env:
+          - name: NODE_OPTIONS
+            value: "--max-old-space-size=2048"
+          - name: SERVER_PUBLICBASEURL
+            value: "http://kibana.logging.svc.cluster.local:5601"
+        resources:
+          requests:
+            memory: {{ .Values.kibana.resources.requests.memory }}
+            cpu: {{ .Values.kibana.resources.requests.cpu }}
+          limits:
+            memory: {{ .Values.kibana.resources.limits.memory }}
+            cpu: {{ .Values.kibana.resources.limits.cpu }}

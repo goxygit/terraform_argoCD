@@ -1,0 +1,42 @@
+apiVersion: beat.k8s.elastic.co/v1beta1
+kind: Beat
+metadata:
+  name: filebeat
+  namespace: logging
+  annotations:
+    argocd.argoproj.io/sync-wave: "15"
+spec:
+  type: filebeat
+  version: 8.5.1
+  elasticsearchRef:
+    name: elasticsearch
+  kibanaRef:
+    name: kibana
+  config:
+    processors:
+    - decode_json_fields:
+        fields: ["message"]
+        target: ""
+        overwrite_keys: true
+    output:
+      elasticsearch:
+        index: "filebeat-%{+yyyy.MM.dd}"
+  daemonSet:
+    podTemplate:
+      spec:
+        containers:
+        - name: filebeat
+          resources:
+            requests:
+              cpu: {{ .Values.filebeat.resources.requests.cpu }}
+              memory: {{ .Values.filebeat.resources.requests.memory }}
+            limits:
+              cpu: {{ .Values.filebeat.resources.limits.cpu }}
+              memory: {{ .Values.filebeat.resources.limits.memory }}
+          volumeMounts:
+          - name: varlogcontainers
+            mountPath: /var/log/containers
+        volumes:
+        - name: varlogcontainers
+          hostPath:
+            path: /var/log/containers
